@@ -1,0 +1,13 @@
+// problem de poisson
+int np=20;
+mesh Th=square(np,np);
+
+fespace Vh(Th,P1);
+Vh u, tu;
+func f = 1;
+plot(Th,wait=1);
+
+problem Poisson(u,tu)= int2d(Th)(dx(u)*dx(tu)+dy(u)*dy(tu))-int2d(Th)(f*tu) +on(1,2,3,4,u=0);
+
+Poisson;
+plot(u,wait=1);

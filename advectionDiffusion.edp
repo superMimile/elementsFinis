@@ -1,0 +1,30 @@
+//int np=40;
+int N = 40;
+real xB=0.5,yB=0.5,rB=0.2;
+border Gs(t=0,1){x=t;y=0;label=1;}
+border Ge(t=0,1){x=1;y=t;label=2;}
+border Gn(t=0,1){x=1-t;y=1;label=3;}
+border Gw(t=0,1){x=0;y=1-t;label=4;}
+border Gin(t=0,2*pi){x=xB+rB*cos(t);y=yB+rB*sin(t);label=5;}
+mesh Th=buildmesh(Gs(N)+Ge(N)+Gn(N)+Gw(N)+Gin(-N));
+plot(Th,wait=1);
+
+
+//mesh Th=square(np,np);
+fespace Vh(Th,P1);
+Vh u=0,tu,pu;
+real dt =0.01, alpha=1/dt, U=10,a=0.1;
+int maxiter = 100;
+func ux = -U*(y-0.5);
+func uy = +U*(x-0.5);
+
+problem ConvDiff(u,tu)=
+int2d(Th)(alpha*u*tu)
++int2d(Th)(a*(dx(u)*dx(tu)+dy(u)*dy(tu)))
+-int2d(Th)(alpha*convect([ux,uy],-dt,pu)*tu)
++on(1,2,3,4,u=y);
+
+for(int i = 0; i < maxiter; i++){
+pu = u;
+ConvDiff; plot(u,wait=1);
+}

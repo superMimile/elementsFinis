@@ -1,0 +1,67 @@
+//int np=40;
+//mesh Th=square(np,np);
+
+int N = 40;
+real xB=0.5,yB=0.5,rB=0.2;
+border Gs(t=0,1){x=t;y=0;label=1;}
+border Ge(t=0,1){x=1;y=t;label=2;}
+border Gn(t=0,1){x=1-t;y=1;label=3;}
+border Gw(t=0,1){x=0;y=1-t;label=4;}
+border Gin(t=0,2*pi){x=xB+rB*cos(t);y=yB+rB*sin(t);label=5;}
+mesh Th=buildmesh(Gs(N)+Ge(N)+Gn(N)+Gw(N)+Gin(-N));
+plot(Th,wait=1);
+
+
+fespace Vh(Th,P1);
+Vh u, tu;
+real a = 0.6, beta = 0;
+func f = 1;
+func uext = 0;
+
+problem Heat(u,tu)=
+int2d(Th)(a*(dx(u)*dx(tu)+dy(u)*dy(tu)))
++int1d(Th,2,4)(beta*u*tu)
+-int1d(Th,2,4)(beta*uext*tu)
+-int2d(Th)(f*tu)
++on(5,1,u=0);
+
+Heat; plot(u,wait=1);
+
+
+
+//Dir
+ 
+Vh uDir, tuDir;
+real aDir = 1, betaDir = 100000;
+
+problem HeatDir(uDir,tuDir)=
+int2d(Th)(a*(dx(uDir)*dx(tuDir)+dy(uDir)*dy(tuDir)))
++int1d(Th,2,4)(beta*uDir*tuDir)
+-int1d(Th,2,4)(beta*uext*tuDir)
+-int2d(Th)(f*tuDir)
++on(5,1,uDir=0);
+HeatDir;
+
+// beta
+
+
+Vh uBeta, tuBeta;
+real aBeta = 0, bBeta = 1;
+
+problem HeatBeta(uBeta,tuBeta)=
+int2d(Th)(a*(dx(uBeta)*dx(tuBeta)+dy(uBeta)*dy(tuBeta)))
++int1d(Th,2,4)(bBeta*uBeta*tuBeta)
+-int1d(Th,2,4)(bBeta*uext*tuBeta)
+-int2d(Th)(f*tuBeta)
++on(2,4,uBeta=0);
+HeatBeta;
+
+
+
+//error
+
+Vh eh = uBeta - uDir;
+real error=int2d(Th)(dx(eh)*dx(eh)+dy(eh)*dy(eh));
+error=sqrt(error);
+cout<< "erreur = "<<error<<"\n";
+

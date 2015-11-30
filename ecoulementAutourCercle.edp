@@ -1,0 +1,24 @@
+int N = 20;
+int L=2;
+real xB=0.5,yB=0.5,rB=0.1;
+border Gs(t=0,L){x=t;y=0;label=1;}
+border Ge(t=0,1){x=L;y=t;label=2;}
+border Gn(t=0,L){x=L-t;y=1;label=3;}
+border Gw(t=0,1){x=0;y=1-t;label=4;}
+border Gin(t=0,2*pi){x=xB+rB*cos(t);y=yB+rB*sin(t);label=5;}
+mesh Th=buildmesh(Gs(N)+Ge(N)+Gn(N)+Gw(N)+Gin(-N));
+plot(Th,wait=1);
+
+fespace Vh(Th,P1b);
+fespace Mh(Th,P1);
+Vh ux, uy, tux, tuy;
+Mh p,tp;
+
+problem Stokes([ux,uy,p],[tux,tuy,tp])=
+int2d(Th)(dx(ux)*dx(tux)+dy(uy)*dy(tuy)+dy(ux)*dy(tux)+dx(uy)*dx(tuy))
+- int2d(Th)(p*(dx(tux)+dy(tuy)))
+- int2d(Th)(tp*(dx(ux)+dy(uy)))
++ on (1,3,5,ux=0,uy=0)
++ on (4,uy=0,ux=y*(1-y));
+
+Stokes; plot([ux,uy], wait=1);

@@ -1,0 +1,42 @@
+int N = 15;
+int L=2;
+real xB=0.5,yB=0.5,rB=0.1;
+border Gs(t=0,L){x=t;y=0;label=1;}
+border Ge(t=0,1){x=L;y=t;label=2;}
+border Gn(t=0,L){x=L-t;y=1;label=3;}
+border Gw(t=0,1){x=0;y=1-t;label=4;}
+border Gin(t=0,2*pi){x=xB+rB*cos(t);y=yB+rB*sin(t);label=5;}
+mesh Th=buildmesh(Gs(N)+Ge(N)+Gn(N)+Gw(N)+Gin(-N));
+plot(Th,wait=1);
+
+fespace Vh(Th,P2);
+fespace Mh(Th,P1);
+Vh ux,uy,tux,tuy,pux,puy;
+Mh p,tp;
+
+real dt = 0.06;
+int maxIter = 1000;
+ux=1;
+uy=0;
+real visco  = 0.002;
+
+
+
+problem Stokes([ux,uy,p],[tux,tuy,tp])=
+int2d(Th)(1/dt*(ux*tux+uy*tuy)
++visco*(dx(ux)*dx(tux)+dy(uy)*dy(tuy)+dy(ux)*dy(tux)+dx(uy)*dx(tuy))
+-(p*(dx(tux)+dy(tuy)))
+-(tp*(dx(ux)+dy(uy)))
+)
+-int2d(Th)(1/dt*(convect([pux,puy],-dt,pux)*tux
+	+convect([pux,puy],-dt,puy)*tuy))
++ on (5,ux=0,uy=0)
++ on (4,uy=0,ux=1);
+
+for(int i = 0; i < maxIter; i++){
+	pux = ux;
+	puy = uy;
+	Stokes;
+	plot(p,wait=0);
+}
+

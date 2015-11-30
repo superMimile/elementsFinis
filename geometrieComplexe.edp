@@ -1,0 +1,9 @@
+int N = 20;
+real xB=0.5,yB=0.5,rB=0.2;
+border Gs(t=0,1){x=t;y=0;label=1;}
+border Ge(t=0,1){x=1;y=t;label=2;}
+border Gn(t=0,1){x=1-t;y=1;label=3;}
+border Gw(t=0,1){x=0;y=1-t;label=4;}
+border Gin(t=0,2*pi){x=xB+rB*cos(t);y=yB+rB*sin(t);label=5;}
+mesh Th=buildmesh(Gs(N)+Ge(N)+Gn(N)+Gw(N)+Gin(-N));
+plot(Th,wait=1);
