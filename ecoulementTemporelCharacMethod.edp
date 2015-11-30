@@ -1,12 +1,31 @@
 int N = 15;
 int L=2;
 real xB=0.5,yB=0.5,rB=0.1;
+
 border Gs(t=0,L){x=t;y=0;label=1;}
 border Ge(t=0,1){x=L;y=t;label=2;}
 border Gn(t=0,L){x=L-t;y=1;label=3;}
 border Gw(t=0,1){x=0;y=1-t;label=4;}
+
+
+// cercle
 border Gin(t=0,2*pi){x=xB+rB*cos(t);y=yB+rB*sin(t);label=5;}
-mesh Th=buildmesh(Gs(N)+Ge(N)+Gn(N)+Gw(N)+Gin(-N));
+//rectangle
+real Lrec = 0.3, lrec=0.1;
+real betaRec = -pi/6, xRec = 0.5, yRec = 0.5;
+border Rec1(t=0,Lrec){x=xRec+t*cos(betaRec);y=yRec+t*sin(betaRec);label=6;}
+border Rec2(t=0,lrec){x=xRec+Lrec*cos(betaRec)+t*sin(betaRec);y=yRec+Lrec*sin(betaRec)+t*cos(betaRec);label=7;}
+border Rec3(t=0,Lrec){x=xRec+(Lrec-t)*cos(betaRec);y=yRec+lrec*sin(betaRec);label=8;}
+border Rec4(t=0,lrec){x=xRec*cos(betaRec);y=yRec+(lrec-t)*sin(betaRec);label=9;}
+//ellipse
+real a = 0.2, b=0.05, xElli = 0.5, yElli = 0.5, betaElli = -pi/12;
+border elli(t=0,2*pi){x=xElli+a*cos(t)*cos(betaElli)-b*sin(t)*sin(betaElli);
+	y=a*cos(t)*sin(betaElli)+b*sin(t)*cos(betaElli)+yElli;label=10;}
+
+
+
+//mesh Th=buildmesh(Gs(N)+Ge(N)+Gn(N)+Gw(N)+Gin(-N));
+mesh Th=buildmesh(Gs(N)+Ge(N)+Gn(N)+Gw(N)+elli(-N));
 plot(Th,wait=1);
 
 fespace Vh(Th,P2);
@@ -30,13 +49,13 @@ int2d(Th)(1/dt*(ux*tux+uy*tuy)
 )
 -int2d(Th)(1/dt*(convect([pux,puy],-dt,pux)*tux
 	+convect([pux,puy],-dt,puy)*tuy))
-+ on (5,ux=0,uy=0)
++ on (10,ux=0,uy=0)
 + on (4,uy=0,ux=1);
 
 for(int i = 0; i < maxIter; i++){
 	pux = ux;
 	puy = uy;
 	Stokes;
-	plot(p,wait=0);
+	plot([ux,uy],wait=0);
 }
 
