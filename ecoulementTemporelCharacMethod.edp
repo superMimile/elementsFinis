@@ -18,14 +18,133 @@ border Rec2(t=0,lrec){x=xRec+Lrec*cos(betaRec)+t*sin(betaRec);y=yRec+Lrec*sin(be
 border Rec3(t=0,Lrec){x=xRec+(Lrec-t)*cos(betaRec);y=yRec+lrec*sin(betaRec);label=8;}
 border Rec4(t=0,lrec){x=xRec*cos(betaRec);y=yRec+(lrec-t)*sin(betaRec);label=9;}
 //ellipse
-real a = 0.2, b=0.05, xElli = 0.5, yElli = 0.5, betaElli = -pi/12;
-border elli(t=0,2*pi){x=xElli+a*cos(t)*cos(betaElli)-b*sin(t)*sin(betaElli);
-	y=a*cos(t)*sin(betaElli)+b*sin(t)*cos(betaElli)+yElli;label=10;}
+//real a = 0.2, b=0.05, xElli = 0.5, yElli = 0.5, betaElli = -pi/6;
+//border elli(t=0,2*pi){x=xElli+a*cos(t)*cos(betaElli)-b*sin(t)*sin(betaElli);
+//	y=a*cos(t)*sin(betaElli)+b*sin(t)*cos(betaElli)+yElli;label=10;}
+//ellipse à fond plat
+real a = 0.2, b=0.05, xElli = 0.5, yElli = 0.5, betaElli = -pi/8;
+border elli1(t=0,pi){x=xElli+a*cos(t)*cos(betaElli)-b*sin(t)*sin(betaElli);
+	y=a*cos(t)*sin(betaElli)+b*sin(t)*cos(betaElli)+yElli;label=11;}
+border elli2(t=-a,a){x=xElli+t*cos(betaElli);
+	y=t*sin(betaElli)+yElli;label=12;}
+//joukovski
+border Joukupper(t=0,1) { x = t+xB;
+y = yB+0.5*(0.17735*sqrt(t)-0.075597*t-0.212836*(t^2)+0.17363*(t^3)-0.06254*(t^4));label=13; }
+border Jouklower(t=1,0) { x = t+xB;
+	y= yB-0.5*(0.17735*sqrt(t)-0.075597*t-0.212836*(t^2)+0.17363*(t^3)-0.06254*(t^4)); label=14; }
+//airfoil
+/*real[int] aa = [0.296900,0.213337,-2.931954,5.229170], bb = [0.002000,0.200000,-0.040625,-0.070312];
+real thickness = 0.1;
+border  airfoilUp1(t=0,thickness){
+	x = xB + t;
+	y = yB + 0.5*(aa[0]*sqrt(t)+aa[1]*t+aa[2]*t^2+aa[3]*t^3);
+	label = 15;
+}
+border  airfoilDown1(t=0,thickness){
+	x = xB + t;
+	y = yB - 0.5*(aa[0]*sqrt(t)+aa[1]*t+aa[2]*t^2+aa[3]*t^3);
+	label = 16;
+}
+
+border  airfoilUp2(t=thickness,1){
+	x = xB + t;
+	y = yB + 0.5*(bb[0]+bb[1]*(1-t)+bb[2]*(1-t)^2+bb[3]*(1-t)^3);
+	label = 17;
+}
+border  airfoilDown2(t=thickness,1){
+	x = xB + t;
+	y = yB - 0.5*(bb[0]+bb[1]*(1-t)+bb[2]*(1-t)^2+bb[3]*(1-t)^3);
+	label = 18;
+}*/
+
+// airfoil2
+real[int] aa = [0.2969,-0.1260,-0.3516,0.2843,-0.1015];
+real thickness = 0.18,c=0.5;
+func real yt(real t) {
+	return thickness/0.2*c*(aa[0]*sqrt(t/c)+aa[1]*t/c+aa[2]*(t/c)^2+aa[3]*(t/c)^3+aa[4]*(t/c)^4);
+};
+border  airfoil2Up(t=0,c){
+	x = xB + t;
+	y = yB + yt(t);
+	label = 15;
+}
+
+border  airfoil2Down(t=0,c){
+	x = xB + t;
+	y = yB - yt(t);
+	label = 16;
+}
+
+//airfoil3
+/*real m, p=0.1;
+border  airfoil3Up1(t=0,pc){
+	x = xB + t;
+	y = yB + thickness/0.2*c*(aa[0]*sqrt(t/c)+aa[1]*t/c+aa[2]*(t/c)^2+aa[3]*(t/c)^3+aa[4]*(t/c)^4);
+	label = 15;
+}
+border  airfoil3Up2(t=pc,c){
+	x = xB + t;
+	y = yB + thickness/0.2*c*(aa[0]*sqrt(t/c)+aa[1]*t/c+aa[2]*(t/c)^2+aa[3]*(t/c)^3+aa[4]*(t/c)^4);
+	label = 15;
+}
+
+border  airfoil3Down(t=0,c){
+	x = xB + t;
+	y = yB - thickness/0.2*c*(aa[0]*sqrt(t/c)+aa[1]*t/c+aa[2]*(t/c)^2+aa[3]*(t/c)^3+aa[4]*(t/c)^4);
+	label = 16;
+}*/
+//airfoil3
+real m=0.13, pos=0.1;
+func real yc(real t){
+	if(t < pos*c){
+		return m*t/pos^2*(2*pos-t/c);
+	}else{
+		return m*(c-t)/(1-pos)^2*(1+t/c-2*pos);
+	}
+};
+func real teta(real t){
+	return 0;
+	if(t < pos*c){
+		return atan(2*m/pos^2*(pos-t/c));
+	}else{
+		return atan(2*m/(1-pos)^2*(pos-t/c));
+	}
+};
+border  airfoil3Up1(t=0,pos*c){
+	x = xB + t - yt(t) * sin(teta(t));
+	y = yB + yc(t) + yt(t) * cos(teta(t));
+	label = 17;
+}
+border  airfoil3Up2(t=pos*c,c){
+	x = xB + t - yt(t) * sin(teta(t));
+	y = yB + yc(t) + yt(t) * cos(teta(t));
+	label = 18;
+}
+
+border  airfoil3Down1(t=0,pos*c){
+	x = xB + t + yt(t) * sin(teta(t));
+	y = yB + yc(t) - yt(t)* cos(teta(t));
+	label = 19;
+}
+border  airfoil3Down2(t=pos*c,c){
+	x = xB + t + yt(t) * sin(teta(t));
+	y = yB + yc(t) - yt(t) * cos(teta(t));
+	label = 20;
+}
 
 
+
+
+
+//profil cambré
+//real c=0.5, m, p;
+//border airfoilNACAUp1(t,0,p*c){
+//	x = xB+t;
+//	y = yB + ()
+//}
 
 //mesh Th=buildmesh(Gs(N)+Ge(N)+Gn(N)+Gw(N)+Gin(-N));
-mesh Th=buildmesh(Gs(N)+Ge(N)+Gn(N)+Gw(N)+elli(-N));
+mesh Th=buildmesh(Gs(N)+Ge(N)+Gn(N)+Gw(N)+airfoil3Up1(-N)+airfoil3Up2(-N)+airfoil3Down1(-N)+airfoil3Down2(-N));
 plot(Th,wait=1);
 
 fespace Vh(Th,P2);
@@ -34,10 +153,15 @@ Vh ux,uy,tux,tuy,pux,puy;
 Mh p,tp;
 
 real dt = 0.06;
-int maxIter = 1000;
+real alpha = 1/dt;
+int maxIter = 100;
 ux=1;
 uy=0;
 real visco  = 0.002;
+Vh phi = ((x-xB)*(x-xB)+(y-xB)*(y-xB) < 1.6*a*a) ;
+real drag, lift ;
+real[int] dd(maxIter),ll(maxIter),tt(maxIter);
+
 
 
 
@@ -49,7 +173,7 @@ int2d(Th)(1/dt*(ux*tux+uy*tuy)
 )
 -int2d(Th)(1/dt*(convect([pux,puy],-dt,pux)*tux
 	+convect([pux,puy],-dt,puy)*tuy))
-+ on (10,ux=0,uy=0)
++ on (17,18,ux=0,uy=0)
 + on (4,uy=0,ux=1);
 
 for(int i = 0; i < maxIter; i++){
@@ -57,5 +181,28 @@ for(int i = 0; i < maxIter; i++){
 	puy = uy;
 	Stokes;
 	plot([ux,uy],wait=0);
+	 //  						Compute Drag
+	tux = phi ; tuy = 0 ; 
+	drag=-int2d(Th)(alpha*(ux*tux+uy*tuy))
+             -int2d(Th)(visco*( dx(ux)*dx(tux)+dy(ux)*dy(tux)+dx(uy)*dx(tuy)+dy(uy)*dy(tuy)))
+             -int2d(Th)(- p*dx(tux) - p*dy(tuy))
+             -int2d(Th)(alpha*(-convect([pux,puy],-dt,pux)*tux
+                               -convect([pux,puy],-dt,puy)*tuy));
+	tux = 0 ; tuy = phi ; 
+	lift=-int2d(Th)(alpha*(ux*tux+uy*tuy))
+             -int2d(Th)(visco*(dx(ux)*dx(tux)+dy(ux)*dy(tux)+dx(uy)*dx(tuy)+dy(uy)*dy(tuy)))
+             -int2d(Th)(- p*dx(tux) - p*dy(tuy))
+             -int2d(Th)(alpha*(-convect([pux,puy],-dt,pux)*tux
+                               -convect([pux,puy],-dt,puy)*tuy));
+	tt(i) = i*dt ; dd(i) = drag ; ll(i) = lift ; 
+	cout << "                                  Time  " << i*dt<< endl ; 
+	cout << "                                  Drag  " << drag << endl ; 
+	cout << "                                  Lift  " << lift << endl ; 
 }
+
+ofstream file("TDL");
+for (int j=0;j<maxIter ; j++){  
+     	file.fixed << tt[j]<< "    "  << dd[j] << "    " << ll[j]  << endl;
+	}
+
 
