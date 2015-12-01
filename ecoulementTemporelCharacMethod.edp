@@ -60,18 +60,19 @@ border  airfoilDown2(t=thickness,1){
 // airfoil2
 real[int] aa = [0.2969,-0.1260,-0.3516,0.2843,-0.1015];
 real thickness = 0.18,c=0.5;
+real angle = -pi/8;
 func real yt(real t) {
 	return thickness/0.2*c*(aa[0]*sqrt(t/c)+aa[1]*t/c+aa[2]*(t/c)^2+aa[3]*(t/c)^3+aa[4]*(t/c)^4);
 };
 border  airfoil2Up(t=0,c){
-	x = xB + t;
-	y = yB + yt(t);
+	x = xB + t*cos(angle)-yt(t)*sin(angle);
+	y = yB + yt(t)*cos(angle)+t*sin(angle);
 	label = 15;
 }
 
 border  airfoil2Down(t=0,c){
-	x = xB + t;
-	y = yB - yt(t);
+	x = xB + t*cos(angle)-yt(t)*sin(angle);
+	y = yB - yt(t)*cos(angle)+t*sin(angle);
 	label = 16;
 }
 
@@ -144,7 +145,7 @@ border  airfoil3Down2(t=pos*c,c){
 //}
 
 //mesh Th=buildmesh(Gs(N)+Ge(N)+Gn(N)+Gw(N)+Gin(-N));
-mesh Th=buildmesh(Gs(N)+Ge(N)+Gn(N)+Gw(N)+airfoil3Up1(-N)+airfoil3Up2(-N)+airfoil3Down1(-N)+airfoil3Down2(-N));
+mesh Th=buildmesh(Gs(N)+Ge(N)+Gn(N)+Gw(N)+airfoil2Up(N)+airfoil2Down(-N));
 plot(Th,wait=1);
 
 fespace Vh(Th,P2);
@@ -173,7 +174,7 @@ int2d(Th)(1/dt*(ux*tux+uy*tuy)
 )
 -int2d(Th)(1/dt*(convect([pux,puy],-dt,pux)*tux
 	+convect([pux,puy],-dt,puy)*tuy))
-+ on (17,18,ux=0,uy=0)
++ on (15,16,ux=0,uy=0)
 + on (4,uy=0,ux=1);
 
 for(int i = 0; i < maxIter; i++){
